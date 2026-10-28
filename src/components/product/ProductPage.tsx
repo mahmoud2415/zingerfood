@@ -9,11 +9,13 @@ import {
   Plus, 
   Minus, 
   ShoppingBag, 
-  Check 
+  Check,
+  MapPin
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { shareContent } from '../../utils/share';
+import { branches } from '../../data/branches';
 
 interface ProductPageProps {
   item: MenuItem;
@@ -33,8 +35,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   onHome,
   onOpenDeals,
 }) => {
-  const { addToCart } = useCart();
+  const { addToCart, selectedBranch, setSelectedBranch } = useCart();
   const { showToast } = useToast();
+
+  const isAvailableInSelectedBranch =
+    !item.availableBranches || item.availableBranches.includes(selectedBranch.id);
 
   const [selectedSize, setSelectedSize] = useState<SizeOption | undefined>(
     item.sizes && item.sizes.length > 0 ? item.sizes[0] : undefined
@@ -247,18 +252,55 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </div>
         </div>
 
+        {/* Branch Exclusivity Banner */}
+        {!isAvailableInSelectedBranch && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-cairo space-y-2">
+            <div className="flex items-center gap-2 font-bold text-amber-200">
+              <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>هذا الصنف متوفر حصرياً في فرع فاقوس - شارع أبو دهشان</span>
+            </div>
+            <p className="text-[11px] text-zinc-400">
+              فرعك المحدد حالياً هو ({selectedBranch.name}). لتتمكن من طلب هذا الصنف، يرجى التبديل إلى فرع فاقوس:
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const faqousBranch = branches.find((b) => b.id === 'faqous-manshiya');
+                if (faqousBranch) {
+                  setSelectedBranch(faqousBranch);
+                  showToast('تم التحويل إلى فرع فاقوس - شارع أبو دهشان بنجاح! 🔥');
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-cairo font-black text-xs transition-all shadow-sm active:scale-95"
+            >
+              التبديل إلى فرع فاقوس لطلب هذا الصنف 🚀
+            </button>
+          </div>
+        )}
+
         {/* 4. Compact Centered Order Button */}
         <div className="flex justify-center pt-3 pb-10">
           <button
-            onClick={handleAddToCart}
+            onClick={isAvailableInSelectedBranch ? handleAddToCart : () => {
+              showToast('يرجى التحويل إلى فرع فاقوس لطلب هذا الصنف', 'warning');
+            }}
+            disabled={!isAvailableInSelectedBranch}
             className={`flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full font-cairo font-black text-sm transition-all shadow-glow-yellow active:scale-95 w-full max-w-sm ${
-              addedAnimation
+              !isAvailableInSelectedBranch
+                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
+                : addedAnimation
                 ? 'bg-zinger-green text-black'
                 : 'bg-zinger-yellow hover:bg-zinger-yellowHover text-black'
             }`}
           >
             {addedAnimation ? <Check className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
-            <span>{addedAnimation ? 'تمت الإضافة للسلة!' : `إضافة إلى السلة (${totalPrice} ج.م)`}</span>
+            <span>
+              {!isAvailableInSelectedBranch
+                ? 'غير متوفر في هذا الفرع'
+                : addedAnimation
+                ? 'تمت الإضافة للسلة!'
+                : `إضافة إلى السلة (${totalPrice} ج.م)`}
+            </span>
           </button>
         </div>
       </div>

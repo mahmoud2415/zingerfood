@@ -5,7 +5,7 @@ import { categories } from './data/categories';
 import { getDealImage } from './data/dealsData';
 import { subscribeToMenuItems, subscribeToDeals, getLocalMenuItems, getLocalDeals } from './services/menuService';
 import { subscribeToAuth } from './services/authService';
-import { CartProvider } from './context/CartContext';
+import { CartProvider, useCart } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 
 // Components
@@ -113,6 +113,18 @@ const MainApp: React.FC = () => {
     window.location.hash = '#/deals';
   };
 
+  const { selectedBranch } = useCart();
+
+  // Filter categories by selected branch (hide exclusive categories e.g. paella / shawarma if branch doesn't offer them)
+  const branchCategories = categories.filter(
+    (c) => !c.availableBranches || c.availableBranches.includes(selectedBranch.id)
+  );
+
+  // Filter menu items by selected branch
+  const branchMenuItems = menuItems.filter(
+    (item) => !item.availableBranches || item.availableBranches.includes(selectedBranch.id)
+  );
+
   // Find active product if in product view
   const activeProduct =
     currentView.type === 'product'
@@ -137,7 +149,7 @@ const MainApp: React.FC = () => {
     return (
       <DealsPage
         deals={deals}
-        menuItems={menuItems}
+        menuItems={branchMenuItems}
         onBack={navigateToHome}
         onHome={navigateToHome}
         onSelectDeal={navigateToDeal}
@@ -148,12 +160,12 @@ const MainApp: React.FC = () => {
   // Find active category if in category view
   const activeCategoryObj =
     currentView.type === 'category'
-      ? categories.find((c) => c.id === currentView.categoryId)
+      ? branchCategories.find((c) => c.id === currentView.categoryId)
       : null;
 
   const categoryItems =
     currentView.type === 'category'
-      ? menuItems.filter((i) => i.category === currentView.categoryId)
+      ? branchMenuItems.filter((i) => i.category === currentView.categoryId)
       : [];
 
   // 1. DEDICATED PRODUCT PAGE VIEW
@@ -184,7 +196,7 @@ const MainApp: React.FC = () => {
       <div className="min-h-screen bg-zinger-bg text-white selection:bg-zinger-yellow selection:text-black">
         <CategoryPage
           category={activeCategoryObj}
-          categories={categories}
+          categories={branchCategories}
           items={categoryItems}
           onBack={() => navigateToHome()}
           onHome={navigateToHome}
@@ -214,14 +226,14 @@ const MainApp: React.FC = () => {
 
         {/* Featured / Bestseller Picks Only */}
         <FeaturedSection
-          items={menuItems}
+          items={branchMenuItems}
           onOpenProduct={(it) => navigateToProduct(it)}
         />
 
         {/* Visual Category Covers Grid */}
         <CategoryGrid
-          categories={categories}
-          menuItems={menuItems}
+          categories={branchCategories}
+          menuItems={branchMenuItems}
           onSelectCategory={(catId) => navigateToCategory(catId)}
         />
       </main>

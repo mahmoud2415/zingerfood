@@ -9,7 +9,8 @@ import {
   User, 
   Bike, 
   Store,
-  Send
+  Send,
+  AlertTriangle
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { branches } from '../../data/branches';
@@ -57,9 +58,23 @@ export const CheckoutDrawer: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Check for items in cart that are restricted to specific branches
+  const unavailableItems = cart.filter(
+    (ci) => ci.item.availableBranches && !ci.item.availableBranches.includes(selectedBranch.id)
+  );
+  const hasUnavailableItems = unavailableItems.length > 0;
+
   const handleSendWhatsAppOrder = () => {
     if (cart.length === 0) {
       showToast('السلة فارغة! أضف وجباتك أولاً', 'warning');
+      return;
+    }
+
+    if (hasUnavailableItems) {
+      showToast(
+        `الأصناف التالية متوفرة حصرياً في فرع فاقوس: ${unavailableItems.map((i) => i.item.nameAr).join('، ')}`,
+        'warning'
+      );
       return;
     }
 
@@ -208,6 +223,19 @@ export const CheckoutDrawer: React.FC = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Branch Restriction Alert Banner */}
+              {hasUnavailableItems && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-cairo space-y-1.5 animate-pulse">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-200">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>تنبيه: أصناف غير متوفرة في {selectedBranch.name}</span>
+                  </div>
+                  <p className="text-[11px] text-amber-300/90 leading-relaxed">
+                    أصناف الشاورما والتندوري والبايا متوفرة حصرياً في <strong>فرع فاقوس - شارع أبو دهشان</strong>. يرجى تبديل الفرع إلى فرع فاقوس لإتمام الطلب أو حذف هذه الأصناف من السلة.
+                  </p>
+                </div>
+              )}
 
               {/* 2. Select Branch (Name Only) */}
               <div className="space-y-2 pt-2 border-t border-zinc-800">
@@ -373,10 +401,15 @@ export const CheckoutDrawer: React.FC = () => {
 
                 <button
                   onClick={handleSendWhatsAppOrder}
-                  className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-zinger-yellow hover:bg-zinger-yellowHover text-black font-cairo font-black text-sm tracking-wide transition-all shadow-glow-yellow active:scale-[0.98]"
+                  disabled={hasUnavailableItems}
+                  className={`w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl font-cairo font-black text-sm tracking-wide transition-all shadow-glow-yellow active:scale-[0.98] ${
+                    hasUnavailableItems
+                      ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
+                      : 'bg-zinger-yellow hover:bg-zinger-yellowHover text-black'
+                  }`}
                 >
                   <Send className="w-4 h-4 stroke-[2.5]" />
-                  <span>إرسال الطلب عبر واتساب</span>
+                  <span>{hasUnavailableItems ? 'يرجى تعديل السلة أو اختيار فرع فاقوس' : 'إرسال الطلب عبر واتساب'}</span>
                 </button>
 
                 <p className="text-[10px] text-zinc-500 text-center font-cairo">

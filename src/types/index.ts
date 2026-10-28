@@ -16,6 +16,7 @@ export interface Category {
   icon: string;
   coverImage: string;
   descAr?: string;
+  availableBranches?: string[];
 }
 
 export interface SizeOption {
@@ -37,6 +38,7 @@ export interface MenuItem {
   allowSpice?: boolean;
   isAvailable: boolean;
   badge?: 'HOT' | 'NEW' | 'BESTSELLER' | 'SUPER CRUNCHY' | 'CHEF PICK';
+  availableBranches?: string[];
   createdAt?: string | number;
 }
 

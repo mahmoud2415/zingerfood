@@ -505,6 +505,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               {item.badge}
                             </span>
                           )}
+                          {item.availableBranches && item.availableBranches.includes('faqous-manshiya') && (
+                            <span className="text-[9px] font-cairo px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold shrink-0">
+                              فاقوس فقط
+                            </span>
+                          )}
                         </div>
 
                         <span className="font-heading font-black text-sm text-zinger-yellow shrink-0">
@@ -790,6 +795,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span className="font-cairo font-bold text-xs text-white">إتاحة اختيار درجة الشطة</span>
                   </label>
                 </div>
+              </div>
+
+              {/* Branch Availability */}
+              <div className="pt-2 border-t border-zinc-900">
+                <label className="text-[11px] font-cairo font-bold text-zinc-300 block mb-1">
+                  إتاحة الصنف بالفروع (Branch Availability)
+                </label>
+                <select
+                  value={editingItem.availableBranches && editingItem.availableBranches.length > 0 ? editingItem.availableBranches[0] : 'all'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditingItem({
+                      ...editingItem,
+                      availableBranches: val === 'all' ? undefined : [val],
+                    });
+                  }}
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white outline-none font-cairo"
+                >
+                  <option value="all">متاح في كافة الفروع (الافتراضي)</option>
+                  <option value="faqous-manshiya">فرع فاقوس - شارع أبو دهشان فقط (شاورما / تندوري / بايا / ماريا)</option>
+                </select>
+                <p className="text-[10px] text-zinc-500 font-cairo mt-1">
+                  عند تحديد فرع فاقوس فقط، لن يظهر هذا الصنف لعملاء فروع الإسماعيلية وأبو كبير وكفر العدوي.
+                </p>
               </div>
 
               {/* Sizes / Weights Manager */}

@@ -13,7 +13,7 @@ import { initialMenuItems } from '../data/initialMenu';
 import { initialDeals } from '../data/dealsData';
 import { uploadToCloudinary, getCloudinaryConfig } from './cloudinaryService';
 
-const MENU_STORAGE_KEY = 'zinger_local_menu_items_v15';
+const MENU_STORAGE_KEY = 'zinger_local_menu_items_v16';
 const DEALS_STORAGE_KEY = 'zinger_local_deals_v12';
 const FIREBASE_OPERATION_TIMEOUT = 30000;
 
