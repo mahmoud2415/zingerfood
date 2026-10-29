@@ -18,14 +18,16 @@ import {
   LogOut, 
   Layers,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  Database,
 } from 'lucide-react';
 import { 
   saveMenuItem, 
   deleteMenuItem, 
   saveDeal, 
   deleteDeal, 
-  uploadMealImage 
+  uploadMealImage,
+  syncAllMenuItemsToFirestore
 } from '../../services/menuService';
 import { 
   migrateBase64ImagesToCloudinary, 
@@ -94,6 +96,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       showToast(err.message || 'حدث خطأ أثناء رفع الصور إلى Cloudinary', 'warning');
     } finally {
       setIsMigrating(false);
+    }
+  };
+
+  const [isSyncingMenu, setIsSyncingMenu] = useState(false);
+
+  const handleSyncOfficialMenu = async () => {
+    if (window.confirm('هل ترغب في مزامنة ورفع كافة الأصناف الـ 161 (الشاورما، البايا، التندوري، البيتزا، الكريب) بالأسعار والأحجام الرسمية الجديدة إلى Firebase؟')) {
+      setIsSyncingMenu(true);
+      try {
+        const count = await syncAllMenuItemsToFirestore();
+        showToast(`تمت مزامنة وتأكيد ${count} صنفاً بنجاح مع Firebase! 🔥`, 'success');
+      } catch (err: any) {
+        showToast('فشل المزامنة مع Firebase: ' + (err.message || ''), 'warning');
+      } finally {
+        setIsSyncingMenu(false);
+      }
     }
   };
 
@@ -373,6 +391,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleSyncOfficialMenu}
+              disabled={isSyncingMenu}
+              title="مزامنة وتأكيد القائمة الرسمية الجديدة مع السحابة"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/70 hover:bg-amber-900/80 border border-amber-800/50 text-xs text-amber-300 font-cairo font-bold transition-all active:scale-95 disabled:opacity-50"
+            >
+              {isSyncingMenu ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+              ) : (
+                <Database className="w-3.5 h-3.5 text-amber-400" />
+              )}
+              <span className="hidden sm:inline">
+                {isSyncingMenu ? 'جاري المزامنة...' : 'مزامنة المنيو مع السحابة'}
+              </span>
+            </button>
+
             <button
               onClick={handleMigrateCloudinary}
               disabled={isMigrating}

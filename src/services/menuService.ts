@@ -13,7 +13,7 @@ import { initialMenuItems } from '../data/initialMenu';
 import { initialDeals } from '../data/dealsData';
 import { uploadToCloudinary, getCloudinaryConfig } from './cloudinaryService';
 
-const MENU_STORAGE_KEY = 'zinger_local_menu_items_v17';
+const MENU_STORAGE_KEY = 'zinger_local_menu_items_v18';
 const DEALS_STORAGE_KEY = 'zinger_local_deals_v12';
 const FIREBASE_OPERATION_TIMEOUT = 30000;
 
@@ -139,7 +139,14 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
       menuCol,
       (snapshot) => {
         if (!snapshot.empty) {
-          const items: MenuItem[] = [];
+          const itemsMap = new Map<string, MenuItem>();
+
+          // 1. Seed with official new initialMenuItems (guarantees Shawarma, Paella, etc. are always present)
+          initialMenuItems.forEach((item) => {
+            itemsMap.set(item.id, { ...item });
+          });
+
+          // 2. Overlay Firestore documents (custom admin edits, availability, new deals/items)
           snapshot.forEach((docSnap) => {
             const data = docSnap.data() as Omit<MenuItem, 'id'>;
             const resolvedImage = resolveItemImage(docSnap.id, data.image);
@@ -149,13 +156,18 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
               updateDoc(docSnap.ref, { image: resolvedImage }).catch(() => {});
             }
 
-            items.push({ 
-              id: docSnap.id, 
-              ...data, 
-              badge: data.badge,
-              image: resolvedImage 
+            const existing = itemsMap.get(docSnap.id);
+            itemsMap.set(docSnap.id, {
+              ...existing,
+              ...data,
+              id: docSnap.id,
+              badge: data.badge ?? existing?.badge,
+              image: resolvedImage,
+              availableBranches: data.availableBranches ?? existing?.availableBranches,
             });
           });
+
+          const items = Array.from(itemsMap.values());
           saveLocalMenuItems(items);
           callback(items);
         } else {
