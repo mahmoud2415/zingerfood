@@ -139,12 +139,6 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
             const itemCategory = data.category || existing?.category;
             const resolvedImage = resolveItemImage(docSnap.id, data.image, itemCategory);
 
-
-            // Self-heal Firestore doc if image is outdated
-            if (data.image !== resolvedImage && !resolvedImage.startsWith('data:') && !resolvedImage.startsWith('http')) {
-              updateDoc(docSnap.ref, { image: resolvedImage }).catch(() => {});
-            }
-
             itemsMap.set(docSnap.id, {
               ...existing,
               ...data,
@@ -153,6 +147,7 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
               image: resolvedImage,
               availableBranches: data.availableBranches ?? existing?.availableBranches,
             });
+
 
 
           });
@@ -288,18 +283,26 @@ export async function toggleItemAvailability(itemId: string, isAvailable: boolea
 }
 
 /**
- * Batch upload all official 139 menu items to Firestore in one click
+ * Fast chunked batch upload of menu items to Firestore with timeout protection
  */
 export async function syncAllMenuItemsToFirestore(items: MenuItem[] = initialMenuItems): Promise<number> {
-  const batch = writeBatch(db);
-  for (const item of items) {
-    const itemRef = doc(db, 'menu_items', item.id);
-    batch.set(itemRef, removeUndefined(item));
+  const CHUNK_SIZE = 50;
+  for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+    const chunk = items.slice(i, i + CHUNK_SIZE);
+    const batch = writeBatch(db);
+    for (const item of chunk) {
+      const itemRef = doc(db, 'menu_items', item.id);
+      batch.set(itemRef, removeUndefined(item));
+    }
+    await withFirebaseTimeout(
+      batch.commit(),
+      'تعذر استكمال المزامنة مع Firebase. يرجى التحقق من اتصال الإنترنت وقواعد الصلاحيات.',
+    );
   }
-  await batch.commit();
   saveLocalMenuItems(items);
   return items.length;
 }
+
 
 /**
  * Add or Update Deal
