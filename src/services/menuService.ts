@@ -14,7 +14,7 @@ import { initialDeals } from '../data/dealsData';
 import { uploadToCloudinary, getCloudinaryConfig } from './cloudinaryService';
 import { getCategoryDefaultImage } from '../data/categories';
 
-const MENU_STORAGE_KEY = 'zinger_local_menu_items_v19';
+const MENU_STORAGE_KEY = 'zinger_local_menu_items_v20';
 const DEALS_STORAGE_KEY = 'zinger_local_deals_v12';
 const FIREBASE_OPERATION_TIMEOUT = 30000;
 
@@ -149,10 +149,11 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
               ...existing,
               ...data,
               id: docSnap.id,
-              badge: data.badge ?? existing?.badge,
+              badge: data.badge || undefined,
               image: resolvedImage,
               availableBranches: data.availableBranches ?? existing?.availableBranches,
             });
+
 
           });
 

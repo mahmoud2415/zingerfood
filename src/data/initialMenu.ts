@@ -2493,8 +2493,13 @@ const baseInitialMenuItems: MenuItem[] = [
   },
 ];
 
-export const initialMenuItems: MenuItem[] = baseInitialMenuItems.map((item) => ({
-  ...item,
-  image: CATEGORY_DEFAULT_IMAGES[item.category] || item.image || '/category_defaults/burgers.jpg',
-}));
+export const initialMenuItems: MenuItem[] = baseInitialMenuItems.map((item) => {
+  const { badge, ...rest } = item;
+  return {
+    ...rest,
+    badge: undefined,
+    image: CATEGORY_DEFAULT_IMAGES[item.category] || item.image || '/category_defaults/burgers.jpg',
+  };
+});
+
 
