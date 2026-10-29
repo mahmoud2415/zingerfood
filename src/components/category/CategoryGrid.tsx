@@ -1,6 +1,7 @@
 import React from 'react';
 import { Category, MenuItem } from '../../types';
 import { ArrowRight } from 'lucide-react';
+import { getCategoryDefaultImage } from '../../data/categories';
 
 interface CategoryGridProps {
   categories: Category[];
@@ -41,9 +42,9 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 loading="lazy"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&auto=format&fit=crop&q=80';
+                  (e.target as HTMLImageElement).src = getCategoryDefaultImage(cat.id);
                 }}
+
               />
 
               {/* Items Counter Badge (Top Right) */}

@@ -16,6 +16,7 @@ import { useCart } from '../../context/CartContext';
 import { branches } from '../../data/branches';
 import { getWhatsAppLink } from '../../utils/whatsapp';
 import { useToast } from '../../context/ToastContext';
+import { getCategoryDefaultImage } from '../../data/categories';
 
 export const CheckoutDrawer: React.FC = () => {
   const {
@@ -171,10 +172,10 @@ export const CheckoutDrawer: React.FC = () => {
                         alt={cartItem.item.nameAr}
                         className="w-12 h-12 rounded-xl object-cover bg-black shrink-0"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80';
+                          (e.target as HTMLImageElement).src = getCategoryDefaultImage(cartItem.item.category);
                         }}
                       />
+
                       <div className="min-w-0 flex-1">
                         <h4 className="font-cairo font-black text-xs text-white line-clamp-1">
                           {cartItem.item.nameAr}

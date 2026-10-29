@@ -35,6 +35,7 @@ import {
 } from '../../services/cloudinaryService';
 import { logoutAdmin } from '../../services/authService';
 import { useToast } from '../../context/ToastContext';
+import { getCategoryDefaultImage } from '../../data/categories';
 
 interface AdminDashboardProps {
   admin: AdminUser;
@@ -523,10 +524,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       alt={item.nameAr}
                       className="w-16 h-16 rounded-xl object-cover bg-zinc-900 shrink-0 border border-zinc-800"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80';
+                        (e.target as HTMLImageElement).src = getCategoryDefaultImage(item.category);
                       }}
                     />
+
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">

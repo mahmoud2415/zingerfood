@@ -3,6 +3,7 @@ import { MenuItem, SizeOption } from '../../types';
 import { X, Plus, Minus, Flame, Share2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
+import { getCategoryDefaultImage } from '../../data/categories';
 
 interface BottomSheetCustomizerProps {
   item: MenuItem | null;
@@ -90,10 +91,10 @@ export const BottomSheetCustomizer: React.FC<BottomSheetCustomizerProps> = ({
             alt={item.nameAr}
             className="w-full h-full object-cover"
             onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
+              (e.target as HTMLImageElement).src = getCategoryDefaultImage(item.category);
             }}
           />
+
           <div className="absolute inset-0 bg-gradient-to-t from-zinger-surface via-zinger-surface/30 to-transparent" />
 
           {/* Close & Share buttons */}

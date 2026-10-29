@@ -12,49 +12,35 @@ import { MenuItem, Deal } from '../types';
 import { initialMenuItems } from '../data/initialMenu';
 import { initialDeals } from '../data/dealsData';
 import { uploadToCloudinary, getCloudinaryConfig } from './cloudinaryService';
+import { getCategoryDefaultImage } from '../data/categories';
 
-const MENU_STORAGE_KEY = 'zinger_local_menu_items_v18';
+const MENU_STORAGE_KEY = 'zinger_local_menu_items_v19';
 const DEALS_STORAGE_KEY = 'zinger_local_deals_v12';
 const FIREBASE_OPERATION_TIMEOUT = 30000;
 
-const initialImageMap = new Map(initialMenuItems.map((i) => [i.id, i.image]));
-
 /**
  * Resolves the final image URL for a menu item.
- * Guarantees that the new official high-res generated images always take priority over legacy static paths,
- * while preserving any custom admin uploaded images (base64 data URLs or cloud storage URLs) or valid new menu paths.
+ * Guarantees that each category gets its dedicated official category image,
+ * while strictly preserving any custom admin uploaded images (Base64 data URLs, Cloudinary, Firebase Storage, etc.).
  */
-export function resolveItemImage(itemId: string, currentImage?: string): string {
-  const freshImg = initialImageMap.get(itemId);
-  if (!freshImg) {
-    return currentImage || '/assets/placeholder-food.jpg';
+export function resolveItemImage(_itemId: string, currentImage?: string, category?: string): string {
+  // Preserve user/admin uploaded custom images
+  if (currentImage && typeof currentImage === 'string') {
+    const isCustomUserUpload =
+      currentImage.startsWith('data:image/') ||
+      currentImage.startsWith('blob:') ||
+      currentImage.startsWith('http://') ||
+      currentImage.startsWith('https://');
+
+    if (isCustomUserUpload) {
+      return currentImage;
+    }
   }
 
-  // If no image is provided or empty string, use the latest fresh image
-  if (!currentImage || typeof currentImage !== 'string' || currentImage.trim() === '') {
-    return freshImg;
-  }
-
-  // Preserve user-uploaded custom images (Base64 data URLs, Cloudinary, Firebase Storage, etc.)
-  const isCustomUserUpload =
-    currentImage.startsWith('data:image/') ||
-    currentImage.startsWith('blob:') ||
-    currentImage.startsWith('http://') ||
-    currentImage.startsWith('https://');
-
-  if (isCustomUserUpload) {
-    return currentImage;
-  }
-
-  // If the stored path is already a valid new /menu_items/ path, use it!
-  if (currentImage.startsWith('/menu_items/')) {
-    return currentImage;
-  }
-
-  // For any legacy or old static path (e.g. /assets/menu/..., /assets/pasta-clean.jpg, حووشي.jpg, sfda.jpg, etc.),
-  // ALWAYS upgrade to the latest official high-resolution image!
-  return freshImg;
+  // Otherwise, use the dedicated category default image
+  return getCategoryDefaultImage(category);
 }
+
 
 function removeUndefined<T extends object>(value: T): Partial<T> {
   return Object.fromEntries(
@@ -84,7 +70,7 @@ export function getLocalMenuItems(): MenuItem[] {
       if (Array.isArray(items) && items.length > 0) {
         return items.map((item) => ({
           ...item,
-          image: resolveItemImage(item.id, item.image),
+          image: resolveItemImage(item.id, item.image, item.category),
         }));
       }
     }
@@ -149,14 +135,16 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
           // 2. Overlay Firestore documents (custom admin edits, availability, new deals/items)
           snapshot.forEach((docSnap) => {
             const data = docSnap.data() as Omit<MenuItem, 'id'>;
-            const resolvedImage = resolveItemImage(docSnap.id, data.image);
+            const existing = itemsMap.get(docSnap.id);
+            const itemCategory = data.category || existing?.category;
+            const resolvedImage = resolveItemImage(docSnap.id, data.image, itemCategory);
+
 
             // Self-heal Firestore doc if image is outdated
             if (data.image !== resolvedImage && !resolvedImage.startsWith('data:') && !resolvedImage.startsWith('http')) {
               updateDoc(docSnap.ref, { image: resolvedImage }).catch(() => {});
             }
 
-            const existing = itemsMap.get(docSnap.id);
             itemsMap.set(docSnap.id, {
               ...existing,
               ...data,
@@ -165,6 +153,7 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
               image: resolvedImage,
               availableBranches: data.availableBranches ?? existing?.availableBranches,
             });
+
           });
 
           const items = Array.from(itemsMap.values());

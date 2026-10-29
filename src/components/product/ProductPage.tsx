@@ -15,6 +15,7 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { shareContent } from '../../utils/share';
+import { getCategoryDefaultImage } from '../../data/categories';
 import { branches } from '../../data/branches';
 
 interface ProductPageProps {
@@ -114,10 +115,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({
             alt={item.nameAr}
             className="w-full h-full object-cover object-center"
             onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80';
+              (e.target as HTMLImageElement).src = getCategoryDefaultImage(item.category);
             }}
           />
+
 
           {/* Badges on Image */}
           {item.badge && (

@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 
 import { shareContent } from '../../utils/share';
+import { getCategoryDefaultImage } from '../../data/categories';
 
 interface FoodCardProps {
   item: MenuItem;
@@ -61,10 +62,10 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item, onOpenCustomizer }) =>
           loading="lazy"
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
+            (e.target as HTMLImageElement).src = getCategoryDefaultImage(item.category);
           }}
         />
+
 
         {/* Badge Overlay */}
         {item.badge && (

@@ -1,6 +1,7 @@
 import { MenuItem } from '../types';
+import { CATEGORY_DEFAULT_IMAGES } from './categories';
 
-export const initialMenuItems: MenuItem[] = [
+const baseInitialMenuItems: MenuItem[] = [
   // ==========================================
   // 1. AMERICAN PIZZA (البيتزا الأمريكي)
   // ==========================================
@@ -2491,3 +2492,9 @@ export const initialMenuItems: MenuItem[] = [
     isAvailable: true,
   },
 ];
+
+export const initialMenuItems: MenuItem[] = baseInitialMenuItems.map((item) => ({
+  ...item,
+  image: CATEGORY_DEFAULT_IMAGES[item.category] || item.image || '/category_defaults/burgers.jpg',
+}));
+

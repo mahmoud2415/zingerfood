@@ -92,3 +92,23 @@ export const categories: Category[] = [
     descAr: "بطاطس، صوصات شيدر ورانش، حلقات بصل، ومشروبات باردة",
   },
 ];
+
+export const CATEGORY_DEFAULT_IMAGES: Record<string, string> = {
+  pizza: '/category_defaults/pizza.jpg',
+  crepes: '/category_defaults/crepes.jpg',
+  paella: '/category_defaults/paella.jpg',
+  shawarma: '/category_defaults/shawarma.jpg',
+  burgers: '/category_defaults/burgers.jpg',
+  crispy_chicken: '/category_defaults/crispy_chicken.jpg',
+  hawawshi: '/covers/hawawshi.jpeg',
+  melted_cheese: '/covers/melted_cheese.jpeg',
+  pasta: '/covers/pasta.jpeg',
+  rolls: '/covers/rolls.jpeg',
+  extras: '/covers/extras.jpeg',
+};
+
+export function getCategoryDefaultImage(categoryId?: string): string {
+  if (!categoryId) return '/category_defaults/burgers.jpg';
+  return CATEGORY_DEFAULT_IMAGES[categoryId] || '/category_defaults/burgers.jpg';
+}
+
