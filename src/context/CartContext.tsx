@@ -14,6 +14,11 @@ interface CartContextType {
   totalPrice: number;
   selectedBranch: Branch;
   setSelectedBranch: (branch: Branch) => void;
+  isBranchModalOpen: boolean;
+  setIsBranchModalOpen: (open: boolean) => void;
+  isInitialBranchSelectionNeeded: boolean;
+  openBranchSelector: () => void;
+  closeBranchSelector: () => void;
   orderType: OrderType;
   setOrderType: (type: OrderType) => void;
   customerInfo: CustomerInfo;
@@ -38,6 +43,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const [hasExplicitBranch, setHasExplicitBranch] = useState<boolean>(() => {
+    try {
+      return !!localStorage.getItem(BRANCH_STORAGE_KEY);
+    } catch {
+      return false;
+    }
+  });
+
   const [selectedBranch, setSelectedBranchState] = useState<Branch>(() => {
     try {
       const savedId = localStorage.getItem(BRANCH_STORAGE_KEY);
@@ -47,6 +60,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return branches[0];
     }
   });
+
+  const [isBranchModalOpen, setIsBranchModalOpen] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(BRANCH_STORAGE_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  const isInitialBranchSelectionNeeded = !hasExplicitBranch;
+
+  const openBranchSelector = () => setIsBranchModalOpen(true);
+  const closeBranchSelector = () => {
+    if (hasExplicitBranch) {
+      setIsBranchModalOpen(false);
+    }
+  };
 
   const [orderType, setOrderType] = useState<OrderType>('delivery');
 
@@ -72,7 +102,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const setSelectedBranch = (branch: Branch) => {
     setSelectedBranchState(branch);
     setCustomerInfo((prev) => ({ ...prev, branchId: branch.id }));
-    localStorage.setItem(BRANCH_STORAGE_KEY, branch.id);
+    setHasExplicitBranch(true);
+    setIsBranchModalOpen(false);
+    try {
+      localStorage.setItem(BRANCH_STORAGE_KEY, branch.id);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const addToCart = (
@@ -153,6 +189,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         totalPrice,
         selectedBranch,
         setSelectedBranch,
+        isBranchModalOpen,
+        setIsBranchModalOpen,
+        isInitialBranchSelectionNeeded,
+        openBranchSelector,
+        closeBranchSelector,
         orderType,
         setOrderType,
         customerInfo,

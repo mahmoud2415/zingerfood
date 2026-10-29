@@ -1,9 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Share2, MapPin, ChevronDown } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useCart } from '../../context/CartContext';
 import { shareContent } from '../../utils/share';
-import { BranchSelectorModal } from '../branch/BranchSelectorModal';
 
 interface NavbarProps {
   onOpenAdmin: () => void;
@@ -12,8 +11,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
   const { showToast } = useToast();
-  const { selectedBranch } = useCart();
-  const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const { selectedBranch, openBranchSelector } = useCart();
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
           {/* Center / Right: Interactive Branch Selector Pill */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsBranchModalOpen(true)}
+              onClick={openBranchSelector}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinger-yellow/40 hover:border-zinger-yellow text-white transition-all active:scale-95 shadow-glow-yellow-sm max-w-[200px] sm:max-w-xs"
               title="تغيير الفرع"
             >
@@ -97,12 +95,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
           </div>
         </div>
       </header>
-
-      {/* Branch Selection Modal */}
-      <BranchSelectorModal
-        isOpen={isBranchModalOpen}
-        onClose={() => setIsBranchModalOpen(false)}
-      />
     </>
   );
 };

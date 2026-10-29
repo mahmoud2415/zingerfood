@@ -22,6 +22,7 @@ import { CheckoutDrawer } from './components/cart/CheckoutDrawer';
 import { Footer } from './components/layout/Footer';
 import { AdminLoginModal } from './components/admin/AdminLoginModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { BranchSelectorModal } from './components/branch/BranchSelectorModal';
 
 type ViewState =
   | { type: 'home' }
@@ -280,6 +281,7 @@ export default function App() {
     <ToastProvider>
       <CartProvider>
         <MainApp />
+        <BranchSelectorModal />
         <Analytics />
       </CartProvider>
     </ToastProvider>

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category, MenuItem } from '../../types';
-import { Home, Tag } from 'lucide-react';
+import { Home, Tag, Sparkles } from 'lucide-react';
 import { FoodCard } from '../menu/FoodCard';
 
 interface CategoryPageProps {
@@ -23,6 +23,46 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
   onSelectCategory,
   onOpenProduct,
 }) => {
+  const [activeSubFilter, setActiveSubFilter] = useState<string>('all');
+
+  useEffect(() => {
+    setActiveSubFilter('all');
+  }, [category.id]);
+
+  // Sub-filter tabs configuration for shawarma & tandoori
+  const shawarmaSubFilters = [
+    { id: 'all', label: 'الكل' },
+    { id: 'sandwich', label: '🌯 ساندوتشات شاورما' },
+    { id: 'meal', label: '🍱 وجبات شاورما' },
+    { id: 'tandoori', label: '🌶️ تندوري هندي' },
+    { id: 'maria', label: '🫓 ماريا سوري' },
+    { id: 'batates', label: '🍟 بطاطس سوري' },
+  ];
+
+  const displayedItems = items.filter((item) => {
+    if (category.id !== 'shawarma' || activeSubFilter === 'all') return true;
+    if (activeSubFilter === 'sandwich') {
+      return (
+        item.nameAr.includes('سندوتش') &&
+        !item.nameAr.includes('تندوري') &&
+        !item.nameAr.includes('بطاطس')
+      );
+    }
+    if (activeSubFilter === 'meal') {
+      return item.nameAr.includes('وجبة') && !item.nameAr.includes('تندوري');
+    }
+    if (activeSubFilter === 'tandoori') {
+      return item.nameAr.includes('تندوري');
+    }
+    if (activeSubFilter === 'maria') {
+      return item.nameAr.includes('ماريا');
+    }
+    if (activeSubFilter === 'batates') {
+      return item.nameAr.includes('بطاطس');
+    }
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-zinger-bg text-white pb-28 animate-fade-in" dir="rtl">
       {/* Top Header */}
@@ -74,33 +114,69 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
           })}
       </div>
 
+      {/* Subcategory Pills (Special for Shawarma & Tandoori & Maria) */}
+      {category.id === 'shawarma' && (
+        <div className="px-4 py-2.5 bg-zinc-900/50 border-b border-zinc-800/80 overflow-x-auto no-scrollbar flex items-center gap-2">
+          {shawarmaSubFilters.map((sub) => {
+            const isSubActive = activeSubFilter === sub.id;
+            return (
+              <button
+                key={sub.id}
+                onClick={() => setActiveSubFilter(sub.id)}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-cairo font-bold transition-all ${
+                  isSubActive
+                    ? 'bg-white text-black shadow-sm font-black'
+                    : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-800'
+                }`}
+              >
+                {sub.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Category Content */}
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
           <div>
-            <h1 className="font-cairo font-black text-xl sm:text-2xl text-white">
-              {category.nameAr}
-            </h1>
-            <p className="font-cairo text-xs sm:text-sm text-zinc-400">
-              قائمة وجبات {category.nameAr} من مطعم زينجر
+            <div className="flex items-center gap-2">
+              <h1 className="font-cairo font-black text-xl sm:text-2xl text-white">
+                {category.nameAr}
+              </h1>
+              {category.availableBranches && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-cairo font-black px-2 py-0.5 rounded-full bg-zinger-yellow/15 text-zinger-yellow border border-zinger-yellow/30">
+                  <Sparkles className="w-3 h-3" />
+                  فرع فاقوس فقط
+                </span>
+              )}
+            </div>
+            <p className="font-cairo text-xs sm:text-sm text-zinc-400 mt-0.5">
+              {category.descAr || `قائمة وجبات ${category.nameAr} من مطعم زينجر`}
             </p>
           </div>
 
-          <span className="text-xs font-cairo font-bold text-zinc-400">
-            {items.length} أصناف
+          <span className="text-xs font-cairo font-bold text-zinc-400 shrink-0">
+            {displayedItems.length} أصناف
           </span>
         </div>
 
         {/* Grid of Food Items (Single column on mobile, 2-3 columns on tablet/desktop) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {items.map((item) => (
-            <FoodCard
-              key={item.id}
-              item={item}
-              onOpenCustomizer={(it) => onOpenProduct(it)}
-            />
-          ))}
-        </div>
+        {displayedItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {displayedItems.map((item) => (
+              <FoodCard
+                key={item.id}
+                item={item}
+                onOpenCustomizer={(it) => onOpenProduct(it)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center text-zinc-500 font-cairo">
+            <p className="text-sm">لا توجد أصناف متوفرة في هذا القسم حالياً</p>
+          </div>
+        )}
       </main>
     </div>
   );

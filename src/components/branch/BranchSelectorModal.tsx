@@ -1,35 +1,74 @@
 import React from 'react';
-import { X, MapPin, Phone, CheckCircle2, Sparkles } from 'lucide-react';
+import { X, MapPin, Phone, CheckCircle2, Sparkles, Store } from 'lucide-react';
 import { branches } from '../../data/branches';
 import { Branch } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 
 interface BranchSelectorModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  isForcedInitial?: boolean;
 }
 
-export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({ isOpen, onClose }) => {
-  const { selectedBranch, setSelectedBranch } = useCart();
+export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  isForcedInitial: propIsForcedInitial,
+}) => {
+  const {
+    selectedBranch,
+    setSelectedBranch,
+    isBranchModalOpen,
+    closeBranchSelector,
+    isInitialBranchSelectionNeeded,
+  } = useCart();
   const { showToast } = useToast();
+
+  const isOpen = propIsOpen !== undefined ? propIsOpen : isBranchModalOpen;
+  const isForced = propIsForcedInitial !== undefined ? propIsForcedInitial : isInitialBranchSelectionNeeded;
+  const handleClose = propOnClose || closeBranchSelector;
 
   if (!isOpen) return null;
 
   const handleSelectBranch = (branch: Branch) => {
     setSelectedBranch(branch);
-    showToast(`تم تحديد ${branch.name} بنجاح 🔥`);
-    onClose();
+    showToast(`تم تحديد ${branch.name} بنجاح! تصفح القائمة الآن 🔥`);
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div 
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in"
+      onClick={() => {
+        if (!isForced) handleClose();
+      }}
+    >
+      <div
         className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-3xl p-6 shadow-2xl overflow-hidden"
         dir="rtl"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Glow decoration */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-zinger-yellow/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-zinger-yellow/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-zinger-red/10 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Initial First-visit Highlight Banner */}
+        {isForced && (
+          <div className="mb-4 p-3 rounded-2xl bg-zinc-900/90 border border-zinger-yellow/40 flex items-center gap-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinger-yellow text-black font-black text-sm">
+              <Store className="w-4 h-4" />
+            </span>
+            <div className="text-right">
+              <p className="text-xs font-cairo font-black text-zinger-yellow">
+                مرحباً بك في مطعم زينجر!
+              </p>
+              <p className="text-[11px] font-cairo text-zinc-300">
+                برجاء اختيار الفرع الأقرب إليك لعرض القائمة المتاحة والبدء بالطلب
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 mb-5">
@@ -40,20 +79,27 @@ export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({ isOpen
             <div>
               <h2 className="text-lg font-cairo font-black text-white">اختر فرع زينجر</h2>
               <p className="text-xs text-zinc-400 font-cairo">
-                اختر الفرع الأقرب إليك لعرض المنيو المتاح وخدمة التوصيل السريع
+                {isForced
+                  ? 'اختر الفرع لتخصيص الأسعار وقائمة الطعام لمدينتك'
+                  : 'يمكنك تغيير الفرع في أي وقت'}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {/* Show close button ONLY if user has already chosen a branch before */}
+          {!isForced && (
+            <button
+              onClick={handleClose}
+              className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              title="إغلاق"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Branch Cards */}
-        <div className="space-y-3 max-h-[60vh] overflow-y-auto no-scrollbar pr-0.5">
+        <div className="space-y-3 max-h-[58vh] overflow-y-auto no-scrollbar pr-0.5">
           {branches.map((branch) => {
             const isSelected = selectedBranch.id === branch.id;
             const isFaqousMain = branch.id === 'faqous-manshiya';
@@ -77,7 +123,7 @@ export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({ isOpen
                       {isFaqousMain && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-cairo font-black px-2 py-0.5 rounded-full bg-zinger-yellow/15 text-zinger-yellow border border-zinger-yellow/30">
                           <Sparkles className="w-3 h-3" />
-                          شاورما وتندوري وبايا
+                          شاورما، تندوري، بايا، وماريا
                         </span>
                       )}
                     </div>
@@ -110,7 +156,7 @@ export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({ isOpen
 
         {/* Footer note */}
         <div className="mt-5 pt-3 border-t border-zinc-800/80 text-center">
-          <p className="text-[11px] text-zinc-500 font-cairo">
+          <p className="text-[11px] text-zinc-400 font-cairo">
             💡 ملاحظة: أصناف الشاورما والتندوري والبايا والماريا متوفرة حصرياً في فرع فاقوس - شارع أبو دهشان.
           </p>
         </div>
