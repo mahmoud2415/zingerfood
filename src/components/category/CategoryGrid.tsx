@@ -3,6 +3,13 @@ import { Category, MenuItem } from '../../types';
 import { ArrowRight } from 'lucide-react';
 import { getCategoryDefaultImage } from '../../data/categories';
 
+const homeCategoryOrder: Record<string, number> = {
+  shawarma: 0,
+  burgers: 1,
+  crepes: 2,
+  pizza: 3,
+};
+
 interface CategoryGridProps {
   categories: Category[];
   menuItems: MenuItem[];
@@ -14,6 +21,13 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   menuItems,
   onSelectCategory,
 }) => {
+  const orderedCategories = categories
+    .filter((cat) => cat.id !== 'deals')
+    .sort(
+      (a, b) =>
+        (homeCategoryOrder[a.id] ?? 4) - (homeCategoryOrder[b.id] ?? 4)
+    );
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-center border-b border-zinc-800 pb-2.5">
@@ -24,10 +38,8 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 
       {/* Grid of Visual Category Covers */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-        {categories
-          .filter((cat) => cat.id !== 'deals')
-          .map((cat) => {
-            const count = menuItems.filter((i) => i.category === cat.id).length;
+        {orderedCategories.map((cat) => {
+          const count = menuItems.filter((i) => i.category === cat.id).length;
 
           return (
             <div
@@ -56,11 +68,15 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 
               {/* Content (Bottom) */}
               <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between gap-2">
-                <div className="bg-black/75 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-white/10">
-                  <h3 className="font-cairo font-black text-sm sm:text-base text-white group-hover:text-zinger-yellow transition-colors line-clamp-1">
-                    {cat.nameAr}
-                  </h3>
-                </div>
+                {cat.id === 'shawarma' ? (
+                  <div className="flex-1" aria-hidden="true" />
+                ) : (
+                  <div className="bg-black/75 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-white/10">
+                    <h3 className="font-cairo font-black text-sm sm:text-base text-white group-hover:text-zinger-yellow transition-colors line-clamp-1">
+                      {cat.nameAr}
+                    </h3>
+                  </div>
+                )}
 
                 <div className="w-8 h-8 rounded-xl bg-zinger-yellow text-black flex items-center justify-center shrink-0 shadow-glow-yellow-sm group-hover:scale-105 transition-all">
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />

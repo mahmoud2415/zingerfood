@@ -30,7 +30,7 @@ export const categories: Category[] = [
     nameEn: "SHAWARMA & TANDOORI",
     nameAr: "ركن الشاورما والبوكسات",
     icon: "Flame",
-    coverImage: "/covers/shawarma.jpeg",
+    coverImage: "/covers/shawarma-category.svg",
     descAr: "ساندوتشات ووجبات الشاورما والبوكسات والفتة والأوزان والوجبات",
     availableBranches: ["faqous-manshiya"],
   },

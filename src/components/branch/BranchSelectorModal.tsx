@@ -123,7 +123,7 @@ export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({
                       {isFaqousMain && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-cairo font-black px-2 py-0.5 rounded-full bg-zinger-yellow/15 text-zinger-yellow border border-zinger-yellow/30">
                           <Sparkles className="w-3 h-3" />
-                          شاورما، تندوري، بايا، وماريا
+                          الشاورما والأصناف المرتبطة بها
                         </span>
                       )}
                     </div>
@@ -157,7 +157,7 @@ export const BranchSelectorModal: React.FC<BranchSelectorModalProps> = ({
         {/* Footer note */}
         <div className="mt-5 pt-3 border-t border-zinc-800/80 text-center">
           <p className="text-[11px] text-zinc-400 font-cairo">
-            💡 ملاحظة: أصناف الشاورما والتندوري والبايا والماريا متوفرة حصرياً في فرع فاقوس - شارع أبو دهشان.
+            ملاحظة: الشاورما والأصناف المرتبطة بها متوفرة حصرياً في فرع فاقوس - شارع أبو دهشان. باقي أصناف المنيو متاحة للفروع الأربعة.
           </p>
         </div>
       </div>
