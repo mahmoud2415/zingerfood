@@ -135,7 +135,7 @@ export const BottomSheetCustomizer: React.FC<BottomSheetCustomizerProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <label className="font-cairo font-black text-xs sm:text-sm text-white">
-                  اختر الحجم
+                  {item.sizeLabelAr || 'اختر الحجم'}
                 </label>
                 <span className="text-[11px] font-bold text-zinger-yellow font-cairo">مطلوب</span>
               </div>

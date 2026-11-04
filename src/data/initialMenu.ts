@@ -2493,13 +2493,332 @@ const baseInitialMenuItems: MenuItem[] = [
   },
 ];
 
-export const initialMenuItems: MenuItem[] = baseInitialMenuItems.map((item) => {
-  const { badge, ...rest } = item;
+const FAQOUS_MANSHIYA_ONLY = ['faqous-manshiya'];
+const SHAWARMA_REPLACED_ITEM_IDS = new Set([
+  'shawarma-syrian-sandwich',
+  'shawarma-syrian-meal-single',
+  'shawarma-syrian-meal-extra',
+  'shawarma-syrian-meal-double',
+  'shawarma-tandoori-sandwich',
+  'shawarma-tandoori-meal-single',
+  'shawarma-tandoori-meal-extra',
+  'shawarma-tandoori-meal-double',
+  'maria-shawarma-syrian',
+  'maria-shawarma-tandoori',
+  'maria-shish-tawook',
+  'maria-chicken-ranch',
+  'batates-syrian-regular',
+  'batates-syrian-mozzarella',
+  'batates-syrian-shawarma',
+  'pizza-shawarma-regular',
+  'pizza-shawarma-tandoori',
+  'pizza-shish-tandoori',
+  'crepe-shawarma-regular',
+  'crepe-shawarma-tandoori',
+  'crepe-shish-tandoori',
+  'crepe-strips-tandoori',
+]);
+
+const shawarmaRelatedItemIds = new Set([
+  'pizza-shawarma-meat',
+  'crepe-shawarma-meat',
+  'paella-shawarma-regular',
+  'paella-shawarma-tandoori',
+  'pasta-shawarma-regular',
+  'pasta-shawarma-tandoori',
+]);
+
+const makeSizes = (...options: Array<[string, number]>): NonNullable<MenuItem['sizes']> =>
+  options.map(([nameAr, price]) => ({ nameAr, price }));
+
+function makeShawarmaItem(
+  id: string,
+  nameAr: string,
+  basePrice: number,
+  menuSection: string,
+  sizes?: NonNullable<MenuItem['sizes']>,
+): MenuItem {
   return {
-    ...rest,
-    badge: undefined,
-    image: CATEGORY_DEFAULT_IMAGES[item.category] || item.image || '/category_defaults/burgers.jpg',
+    id,
+    category: 'shawarma',
+    menuSection,
+    nameAr,
+    descAr: '',
+    basePrice,
+    image: CATEGORY_DEFAULT_IMAGES.shawarma,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    allowSpice: false,
+    isAvailable: true,
+    sizes,
+    sizeLabelAr: sizes?.[0]?.nameAr === 'فراخ' ? 'اختر نوع الشاورما' : undefined,
   };
-});
+}
 
+const chickenMixMeatOptions = (chicken: number, mix: number, meat: number) =>
+  makeSizes(['فراخ', chicken], ['مكس', mix], ['لحمة', meat]);
 
+const newShawarmaMenuItems: MenuItem[] = [
+  makeShawarmaItem(
+    'shawarma-rocket',
+    'شاورما صاروخ',
+    85,
+    'sandwiches',
+    chickenMixMeatOptions(85, 90, 95),
+  ),
+  makeShawarmaItem(
+    'shawarma-large',
+    'شاورما كبير',
+    75,
+    'sandwiches',
+    chickenMixMeatOptions(75, 80, 85),
+  ),
+  makeShawarmaItem(
+    'shawarma-half-meter',
+    'شاورما نص متر',
+    150,
+    'sandwiches',
+    chickenMixMeatOptions(150, 160, 170),
+  ),
+  makeShawarmaItem(
+    'shawarma-box-single',
+    'بوكس عربي سنجل',
+    120,
+    'meals',
+    chickenMixMeatOptions(120, 130, 140),
+  ),
+  makeShawarmaItem(
+    'shawarma-box-extra',
+    'بوكس عربي اكسترا',
+    160,
+    'meals',
+    chickenMixMeatOptions(160, 170, 180),
+  ),
+  makeShawarmaItem(
+    'shawarma-box-super',
+    'بوكس عربي سوبر',
+    180,
+    'meals',
+    chickenMixMeatOptions(180, 190, 195),
+  ),
+  makeShawarmaItem(
+    'shawarma-box-double',
+    'بوكس عربي دبل',
+    220,
+    'meals',
+    chickenMixMeatOptions(220, 240, 245),
+  ),
+  makeShawarmaItem(
+    'shawarma-box-triple',
+    'بوكس عربي تربل',
+    280,
+    'meals',
+    chickenMixMeatOptions(280, 310, 320),
+  ),
+  makeShawarmaItem('maria-sausage-cheese', 'سجق تشيز', 135, 'maria'),
+  makeShawarmaItem('maria-chicken-shawarma', 'شاورما فراخ تشيز', 145, 'maria'),
+  makeShawarmaItem('maria-shish-cheese', 'شيش تشيز', 145, 'maria'),
+  makeShawarmaItem('maria-crispy-cheese', 'كرسبي تشيز', 150, 'maria'),
+  makeShawarmaItem('maria-meat-shawarma', 'شاورما لحمة تشيز', 175, 'maria'),
+  makeShawarmaItem(
+    'shawarma-kaiser-four',
+    'بوكس 4 كايزر',
+    150,
+    'kaiser',
+    chickenMixMeatOptions(150, 160, 170),
+  ),
+  makeShawarmaItem(
+    'shawarma-kaiser-six',
+    'بوكس 6 كايزر',
+    225,
+    'kaiser',
+    chickenMixMeatOptions(225, 240, 260),
+  ),
+  makeShawarmaItem(
+    'shawarma-fatta-small',
+    'فتة صغير',
+    80,
+    'fatta',
+    chickenMixMeatOptions(80, 85, 95),
+  ),
+  makeShawarmaItem(
+    'shawarma-fatta-medium',
+    'فتة وسط',
+    120,
+    'fatta',
+    chickenMixMeatOptions(120, 125, 140),
+  ),
+  makeShawarmaItem(
+    'shawarma-fatta-large',
+    'فتة كبير',
+    145,
+    'fatta',
+    chickenMixMeatOptions(145, 150, 155),
+  ),
+  makeShawarmaItem(
+    'shawarma-quarter-kilo',
+    'ربع كيلو شاورما',
+    140,
+    'weights',
+    chickenMixMeatOptions(140, 145, 155),
+  ),
+  makeShawarmaItem(
+    'shawarma-half-kilo',
+    'نص كيلو شاورما',
+    255,
+    'weights',
+    chickenMixMeatOptions(255, 270, 295),
+  ),
+  makeShawarmaItem(
+    'shawarma-one-kilo',
+    'كيلو شاورما',
+    500,
+    'weights',
+    chickenMixMeatOptions(500, 540, 590),
+  ),
+  makeShawarmaItem('shawarma-potato-regular', 'بطاطس سوري', 30, 'potato'),
+  makeShawarmaItem('shawarma-potato-mozzarella', 'بطاطس سوري موزاريلا', 40, 'potato'),
+  makeShawarmaItem('shawarma-potato-meat', 'بطاطس مع شريحة شاورما', 60, 'potato'),
+  makeShawarmaItem('shawarma-western-crispy', 'وجبة كرسبي 4 قطع', 150, 'western'),
+  makeShawarmaItem('shawarma-western-zinger', 'وجبة زنجر 4 قطع', 155, 'western'),
+  makeShawarmaItem('shawarma-western-shish', 'وجبة شيش 10 قطع', 170, 'western'),
+  makeShawarmaItem('shawarma-western-zinger-pieces', 'وجبة قطع زنجر', 200, 'western'),
+];
+
+const additionalMenuItems: MenuItem[] = [
+  {
+    id: 'pizza-shawarma-meat',
+    category: 'pizza',
+    nameAr: 'بيتزا شاورما لحم',
+    descAr: 'بيتزا بالشاورما حسب المنيو',
+    basePrice: 170,
+    image: CATEGORY_DEFAULT_IMAGES.pizza,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    isAvailable: true,
+    sizes: makeSizes(['وسط (M)', 170], ['كبير (L)', 200], ['إكس لارج (XL)', 230]),
+  },
+  {
+    id: 'crepe-shawarma-meat',
+    category: 'crepes',
+    nameAr: 'كريب شاورما لحم',
+    descAr: 'كريب محشو بالشاورما',
+    basePrice: 150,
+    image: CATEGORY_DEFAULT_IMAGES.crepes,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    isAvailable: true,
+    sizes: makeSizes(['وسط (M)', 150], ['كبير (L)', 170], ['إكس لارج (XL)', 185]),
+  },
+  {
+    id: 'fries-rizo',
+    category: 'burgers',
+    nameAr: 'طبق ريزو دجاج مقرمش',
+    descAr: 'أرز ريزو ذهبي مقرمش مع قطع الدجاج وصوص باربيكيو',
+    basePrice: 95,
+    image: CATEGORY_DEFAULT_IMAGES.crispy_chicken,
+    isAvailable: true,
+    sizes: makeSizes(['وسط (M)', 95], ['كبير (L)', 130]),
+  },
+  {
+    id: 'extras-toum-small',
+    category: 'extras',
+    nameAr: 'علبة تومية صغيرة',
+    descAr: 'تومية عادية أو سبايسي',
+    basePrice: 10,
+    image: CATEGORY_DEFAULT_IMAGES.extras,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    isAvailable: true,
+    sizes: makeSizes(['عادي', 10], ['سبايسي', 10]),
+    sizeLabelAr: 'اختر درجة التومية',
+  },
+  {
+    id: 'extras-toum-large',
+    category: 'extras',
+    nameAr: 'علبة تومية كبيرة',
+    descAr: 'تومية عادية أو سبايسي',
+    basePrice: 15,
+    image: CATEGORY_DEFAULT_IMAGES.extras,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    isAvailable: true,
+    sizes: makeSizes(['عادي', 15], ['سبايسي', 15]),
+    sizeLabelAr: 'اختر درجة التومية',
+  },
+  {
+    id: 'extras-pickled-mix',
+    category: 'extras',
+    nameAr: 'مخلل مشكل',
+    descAr: 'تشكيلة مخلل مشكل',
+    basePrice: 10,
+    image: CATEGORY_DEFAULT_IMAGES.extras,
+    availableBranches: FAQOUS_MANSHIYA_ONLY,
+    isAvailable: true,
+  },
+];
+
+const paellaPrices: Record<string, Array<[string, number]>> = {
+  'paella-mix-cheese': [['سلايس', 140], ['وسط (M)', 165], ['كبير (L)', 195], ['إكس لارج (XL)', 215]],
+  'paella-crunchy-turkey': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-chicken-fresh': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-chicken-ranch': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-chicken-bbq': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-chicken-texas': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-shish-charcoal': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 235]],
+  'paella-mix-chicken': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-super-supreme-chicken': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-super-supreme-meat': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-fajita': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-chicken-jalapeno': [['سلايس', 140], ['وسط (M)', 175], ['كبير (L)', 205], ['إكس لارج (XL)', 225]],
+  'paella-shrimp': [['سلايس', 170], ['وسط (M)', 195], ['كبير (L)', 225], ['إكس لارج (XL)', 255]],
+  'paella-shawarma-regular': [['سلايس', 140], ['وسط (M)', 180], ['كبير (L)', 210], ['إكس لارج (XL)', 250]],
+  'paella-shawarma-tandoori': [['سلايس', 140], ['وسط (M)', 180], ['كبير (L)', 210], ['إكس لارج (XL)', 250]],
+};
+
+const removedLegacyProductIds = new Set([
+  ...SHAWARMA_REPLACED_ITEM_IDS,
+  'roll-shish',
+  'roll-zinger',
+  'roll-mix-chicken',
+  'roll-cordon-bleu',
+  'roll-mix-cheese',
+]);
+
+const updatedBaseMenuItems = baseInitialMenuItems
+  .filter((item) => !removedLegacyProductIds.has(item.id))
+  .map((item) => {
+    const updated: MenuItem = { ...item, badge: undefined };
+
+    if (item.category === 'crispy_chicken') {
+      updated.category = 'burgers';
+    }
+
+    if (item.category === 'paella') {
+      updated.sizes = makeSizes(...paellaPrices[item.id]);
+      updated.basePrice = updated.sizes[0].price;
+    }
+
+    if (item.id === 'paella-shawarma-regular') {
+      updated.nameAr = 'بايا شاورما فراخ';
+      updated.descAr = 'بايا بالشاورما والدجاج';
+    } else if (item.id === 'paella-shawarma-tandoori') {
+      updated.nameAr = 'بايا شاورما لحوم';
+      updated.descAr = 'بايا بالشاورما واللحوم';
+    } else if (item.id === 'pasta-shawarma-regular') {
+      updated.nameAr = 'باستا شاورما عادي';
+      updated.descAr = 'باستا بالوايت صوص مع شرائح شاورما الفراخ والموتزاريلا';
+    } else if (item.id === 'pasta-shawarma-tandoori') {
+      updated.nameAr = 'باستا شاورما لحمة';
+      updated.descAr = 'باستا بالوايت صوص مع شرائح شاورما اللحمة والموتزاريلا';
+    }
+
+    updated.availableBranches =
+      item.category === 'shawarma' || shawarmaRelatedItemIds.has(item.id)
+        ? FAQOUS_MANSHIYA_ONLY
+        : undefined;
+    updated.image =
+      CATEGORY_DEFAULT_IMAGES[updated.category] || item.image || '/category_defaults/burgers.jpg';
+    return updated;
+  });
+
+export const initialMenuItems: MenuItem[] = [
+  ...updatedBaseMenuItems,
+  ...newShawarmaMenuItems,
+  ...additionalMenuItems,
+];

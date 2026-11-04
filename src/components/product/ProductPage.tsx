@@ -163,7 +163,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           <div className="bg-zinger-card p-5 rounded-3xl border border-zinc-800 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-cairo font-black text-sm text-white">
-                اختر الحجم
+                {item.sizeLabelAr || 'اختر الحجم'}
               </h3>
               <span className="text-xs font-cairo font-bold text-zinger-yellow">مطلوب</span>
             </div>

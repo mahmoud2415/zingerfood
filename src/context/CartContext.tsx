@@ -118,7 +118,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     quantity: number = 1
   ) => {
     const unitPrice = size ? size.price : item.basePrice;
-    const cartItemId = `${item.id}_${size?.nameEn || 'def'}_${spiceLevel || 'mild'}`;
+    const cartItemId = `${item.id}_${size?.nameEn || size?.nameAr || 'def'}_${spiceLevel || 'mild'}`;
 
     setCart((prev) => {
       const existingIdx = prev.findIndex((ci) => ci.cartItemId === cartItemId);

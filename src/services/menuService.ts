@@ -5,7 +5,8 @@ import {
   setDoc, 
   deleteDoc, 
   updateDoc,
-  writeBatch
+  writeBatch,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { MenuItem, Deal } from '../types';
@@ -14,7 +15,7 @@ import { initialDeals } from '../data/dealsData';
 import { uploadToCloudinary, getCloudinaryConfig } from './cloudinaryService';
 import { getCategoryDefaultImage } from '../data/categories';
 
-const MENU_STORAGE_KEY = 'zinger_local_menu_items_v20';
+const MENU_STORAGE_KEY = 'zinger_local_menu_items_v21';
 const DEALS_STORAGE_KEY = 'zinger_local_deals_v12';
 const FIREBASE_OPERATION_TIMEOUT = 30000;
 
@@ -125,40 +126,22 @@ export function subscribeToMenuItems(callback: (items: MenuItem[]) => void): () 
       menuCol,
       (snapshot) => {
         if (!snapshot.empty) {
-          const itemsMap = new Map<string, MenuItem>();
-
-          // 1. Seed with official new initialMenuItems (guarantees Shawarma, Paella, etc. are always present)
-          initialMenuItems.forEach((item) => {
-            itemsMap.set(item.id, { ...item });
-          });
-
-          // 2. Overlay Firestore documents (custom admin edits, availability, new deals/items)
+          const items: MenuItem[] = [];
           snapshot.forEach((docSnap) => {
             const data = docSnap.data() as Omit<MenuItem, 'id'>;
-            const existing = itemsMap.get(docSnap.id);
-            const itemCategory = data.category || existing?.category;
-            const resolvedImage = resolveItemImage(docSnap.id, data.image, itemCategory);
-
-            itemsMap.set(docSnap.id, {
-              ...existing,
+            items.push({
               ...data,
               id: docSnap.id,
               badge: data.badge || undefined,
-              image: resolvedImage,
-              availableBranches: data.availableBranches ?? existing?.availableBranches,
+              image: resolveItemImage(docSnap.id, data.image, data.category),
             });
-
-
-
           });
 
-          const items = Array.from(itemsMap.values());
           saveLocalMenuItems(items);
           callback(items);
         } else {
-          // If firestore is empty, use initialMenuItems
-          const local = getLocalMenuItems();
-          callback(local);
+          saveLocalMenuItems(initialMenuItems);
+          callback(initialMenuItems);
         }
       },
       (error) => {
@@ -286,19 +269,54 @@ export async function toggleItemAvailability(itemId: string, isAvailable: boolea
  * Fast chunked batch upload of menu items to Firestore with timeout protection
  */
 export async function syncAllMenuItemsToFirestore(items: MenuItem[] = initialMenuItems): Promise<number> {
-  const CHUNK_SIZE = 50;
-  for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-    const chunk = items.slice(i, i + CHUNK_SIZE);
+  const itemIds = new Set(items.map((item) => item.id));
+  if (itemIds.size !== items.length) {
+    throw new Error('لا يمكن مزامنة المنيو لوجود أصناف مكررة بنفس المعرّف.');
+  }
+
+  const menuCol = collection(db, 'menu_items');
+  const currentSnapshot = await withFirebaseTimeout(
+    getDocs(menuCol),
+    'تعذر قراءة المنيو الحالي من Firebase قبل المزامنة.',
+  );
+  const staleIds = currentSnapshot.docs
+    .map((menuDoc) => menuDoc.id)
+    .filter((id) => !itemIds.has(id));
+  const operations = [
+    ...items.map((item) => ({ type: 'set' as const, item })),
+    ...staleIds.map((id) => ({ type: 'delete' as const, id })),
+  ];
+
+  const CHUNK_SIZE = 400;
+  for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
+    const chunk = operations.slice(i, i + CHUNK_SIZE);
     const batch = writeBatch(db);
-    for (const item of chunk) {
-      const itemRef = doc(db, 'menu_items', item.id);
-      batch.set(itemRef, removeUndefined(item));
+    for (const operation of chunk) {
+      if (operation.type === 'set') {
+        batch.set(doc(db, 'menu_items', operation.item.id), removeUndefined(operation.item));
+      } else {
+        batch.delete(doc(db, 'menu_items', operation.id));
+      }
     }
     await withFirebaseTimeout(
       batch.commit(),
-      'تعذر استكمال المزامنة مع Firebase. يرجى التحقق من اتصال الإنترنت وقواعد الصلاحيات.',
+      'تعذر استكمال مزامنة واستبدال المنيو مع Firebase. يرجى التحقق من اتصال الإنترنت وقواعد الصلاحيات.',
     );
   }
+
+  const verifiedSnapshot = await withFirebaseTimeout(
+    getDocs(menuCol),
+    'تعذر التحقق من المنيو بعد المزامنة مع Firebase.',
+  );
+  const syncedIds = new Set(verifiedSnapshot.docs.map((menuDoc) => menuDoc.id));
+  const missingCount = items.filter((item) => !syncedIds.has(item.id)).length;
+  const unexpectedCount = [...syncedIds].filter((id) => !itemIds.has(id)).length;
+  if (missingCount > 0 || unexpectedCount > 0) {
+    throw new Error(
+      `فشل التحقق من المنيو بعد المزامنة. أصناف مفقودة: ${missingCount}، وأصناف قديمة أو غير متوقعة: ${unexpectedCount}.`,
+    );
+  }
+
   saveLocalMenuItems(items);
   return items.length;
 }

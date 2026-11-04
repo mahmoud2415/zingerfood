@@ -103,7 +103,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isSyncingMenu, setIsSyncingMenu] = useState(false);
 
   const handleSyncOfficialMenu = async () => {
-    if (window.confirm('هل ترغب في مزامنة ورفع كافة الأصناف الـ 161 (الشاورما، البايا، التندوري، البيتزا، الكريب) بالأسعار والأحجام الرسمية الجديدة إلى Firebase؟')) {
+    if (window.confirm('سيتم استبدال منيو Firebase بالمنيو الحالي، وحذف الأصناف القديمة غير الموجودة فيه من قاعدة البيانات. هل تريد المتابعة؟')) {
       setIsSyncingMenu(true);
       try {
         const count = await syncAllMenuItemsToFirestore();
@@ -170,7 +170,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     setSavingItem(true);
     try {
-      let itemToSave = editingItem as MenuItem;
+      const isShawarmaRelated =
+        editingItem.category === 'shawarma' ||
+        /شاورما/.test(`${editingItem.nameAr || ''} ${editingItem.descAr || ''}`);
+      let itemToSave: MenuItem = {
+        ...editingItem as MenuItem,
+        availableBranches: isShawarmaRelated
+          ? ['faqous-manshiya']
+          : editingItem.availableBranches,
+      };
       if (pendingItemImage) {
         setSavingItemImage(true);
         const imageUrl = await uploadMealImage(pendingItemImage);
@@ -726,6 +734,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
 
+              {editingItem.category === 'shawarma' && (
+                <div>
+                  <label className="text-[11px] font-cairo font-bold text-zinc-300 block mb-1">
+                    مجموعة المنيو
+                  </label>
+                  <select
+                    value={editingItem.menuSection || 'sandwiches'}
+                    onChange={(e) => setEditingItem({ ...editingItem, menuSection: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white outline-none font-cairo"
+                  >
+                    <option value="sandwiches">ساندوتشات الشاورما</option>
+                    <option value="meals">البوكسات العربية</option>
+                    <option value="kaiser">بوكس كايزر</option>
+                    <option value="maria">ماريا تشيز</option>
+                    <option value="fatta">فتة</option>
+                    <option value="weights">أوزان الشاورما</option>
+                    <option value="potato">بطاطس سوري</option>
+                    <option value="western">وجبات غربي</option>
+                  </select>
+                </div>
+              )}
+
               {/* Category & Base Price */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -849,7 +879,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white outline-none font-cairo"
                 >
                   <option value="all">متاح في كافة الفروع (الافتراضي)</option>
-                  <option value="faqous-manshiya">فرع فاقوس - شارع أبو دهشان فقط (شاورما / تندوري / بايا / ماريا)</option>
+                  <option value="faqous-manshiya">فرع فاقوس المنشية فقط (الشاورما والأصناف المرتبطة بها)</option>
                 </select>
                 <p className="text-[10px] text-zinc-500 font-cairo mt-1">
                   عند تحديد فرع فاقوس فقط، لن يظهر هذا الصنف لعملاء فروع الإسماعيلية وأبو كبير وكفر العدوي.

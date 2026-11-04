@@ -7,49 +7,40 @@ export const categories: Category[] = [
     nameAr: "بيتزا أمريكي",
     icon: "Pizza",
     coverImage: "/covers/pizza.jpeg",
-    descAr: "عجينة أمريكية هشة مع تشيكن باربيكيو وبيبيروني وميكس جبن وشاورما",
+    descAr: "بيتزا أمريكية بالسلايس والأحجام المختلفة، مع البيتزا الخاصة والجديدة",
   },
   {
     id: "crepes",
     nameEn: "FRENCH CREPES",
-    nameAr: "كريب زينجر",
+    nameAr: "الكريب الفرنسي والسبيشيال",
     icon: "Utensils",
     coverImage: "/covers/crepes.jpeg",
-    descAr: "كريب مقرمش محشو بالفراخ واللحوم والموزاريلا السايحة ورول مميز",
+    descAr: "كريب فرنسي وكريب سبيشيال بأحجام متعددة",
   },
   {
     id: "paella",
     nameEn: "ITALIAN PAELLA",
-    nameAr: "البايا الإيطالية",
+    nameAr: "البايا",
     icon: "Layers",
     coverImage: "/covers/paella.jpeg",
-    descAr: "فطائر بايا إيطالية مقرمشة ومحشوة بألذ الأجبان وقطع الدجاج واللحوم",
-    availableBranches: ["faqous-manshiya"],
+    descAr: "بايا بالأجبان والدجاج واللحوم بأحجام متعددة",
   },
   {
     id: "shawarma",
     nameEn: "SHAWARMA & TANDOORI",
-    nameAr: "شاورما وتندوري وماريا",
+    nameAr: "ركن الشاورما والبوكسات",
     icon: "Flame",
     coverImage: "/covers/shawarma.jpeg",
-    descAr: "ساندوتشات ووجبات شاورما سوري، تندوري هندي حار، ساندوتشات ماريا، وبطاطس سوري",
+    descAr: "ساندوتشات ووجبات الشاورما والبوكسات والفتة والأوزان والوجبات",
     availableBranches: ["faqous-manshiya"],
   },
   {
     id: "burgers",
     nameEn: "BEEF BURGERS",
-    nameAr: "برجر لحم",
+    nameAr: "ركن البرجر والفرايز المحملة",
     icon: "Beef",
     coverImage: "/covers/burgers.jpeg",
-    descAr: "برجر لحم بلدي مشوي عالفحم، كلاسيك، هالبينو، إكسترا مايل، وسوبر نايت",
-  },
-  {
-    id: "crispy_chicken",
-    nameEn: "CRUNCHY SANDWICHES",
-    nameAr: "تشيكن برجر وفرايز",
-    icon: "Drumstick",
-    coverImage: "/covers/crispy_chicken.jpeg",
-    descAr: "صدور دجاج كرانشي فريش مقرمشة، تشيكن بيكون، تركي مدخن، وفرايز محملة وريزو",
+    descAr: "برجر اللحم والدجاج والفرايز المحملة وأطباق الريزو",
   },
   {
     id: "hawawshi",
@@ -76,14 +67,6 @@ export const categories: Category[] = [
     descAr: "طواجن مكرونة وبنا بالوايت صوص الإيطالي والموزاريلا وشاورما تندوري",
   },
   {
-    id: "rolls",
-    nameEn: "WETCH ROLLS",
-    nameAr: "وتش رول",
-    icon: "Layers",
-    coverImage: "/covers/rolls.jpeg",
-    descAr: "رول تورتيلا محمص غرقان بقطع الدجاج والجبنة وش بيتزا",
-  },
-  {
     id: "extras",
     nameEn: "EXTRAS & DRINKS",
     nameAr: "الإضافات والصوصات والمشروبات",
@@ -103,7 +86,6 @@ export const CATEGORY_DEFAULT_IMAGES: Record<string, string> = {
   hawawshi: '/covers/hawawshi.jpeg',
   melted_cheese: '/covers/melted_cheese.jpeg',
   pasta: '/covers/pasta.jpeg',
-  rolls: '/covers/rolls.jpeg',
   extras: '/covers/extras.jpeg',
 };
 
@@ -111,4 +93,3 @@ export function getCategoryDefaultImage(categoryId?: string): string {
   if (!categoryId) return '/category_defaults/burgers.jpg';
   return CATEGORY_DEFAULT_IMAGES[categoryId] || '/category_defaults/burgers.jpg';
 }
-

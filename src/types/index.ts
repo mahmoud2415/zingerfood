@@ -28,6 +28,7 @@ export interface SizeOption {
 export interface MenuItem {
   id: string;
   category: string;
+  menuSection?: string;
   nameAr: string;
   nameEn?: string;
   descAr: string;
@@ -35,6 +36,7 @@ export interface MenuItem {
   image: string;
   images?: string[];
   sizes?: SizeOption[];
+  sizeLabelAr?: string;
   allowSpice?: boolean;
   isAvailable: boolean;
   badge?: 'HOT' | 'NEW' | 'BESTSELLER' | 'SUPER CRUNCHY' | 'CHEF PICK';

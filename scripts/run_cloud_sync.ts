@@ -27,25 +27,55 @@ function removeUndefined<T extends Record<string, any>>(obj: T): any {
 async function syncAllToFirestore() {
   console.log(`Starting Firestore sync for ${initialMenuItems.length} menu items...`);
 
-  // Batch writes in chunks of 250 (Firestore limit is 500)
-  const chunkSize = 250;
-  for (let i = 0; i < initialMenuItems.length; i += chunkSize) {
-    const chunk = initialMenuItems.slice(i, i + chunkSize);
+  const itemIds = new Set(initialMenuItems.map((item) => item.id));
+  if (itemIds.size !== initialMenuItems.length) {
+    throw new Error('The menu contains duplicate item IDs.');
+  }
+
+  const menuCollection = collection(db, 'menu_items');
+  const currentMenu = await getDocs(menuCollection);
+  const staleIds = currentMenu.docs
+    .map((menuDoc) => menuDoc.id)
+    .filter((id) => !itemIds.has(id));
+  const operations = [
+    ...initialMenuItems.map((item) => ({ type: 'set' as const, item })),
+    ...staleIds.map((id) => ({ type: 'delete' as const, id })),
+  ];
+
+  console.log(`Replacing ${currentMenu.size} existing items; removing ${staleIds.length} obsolete items.`);
+
+  const chunkSize = 400;
+  for (let i = 0; i < operations.length; i += chunkSize) {
+    const chunk = operations.slice(i, i + chunkSize);
     const batch = writeBatch(db);
 
-    for (const item of chunk) {
-      const itemRef = doc(db, 'menu_items', item.id);
-      batch.set(itemRef, removeUndefined(item));
+    for (const operation of chunk) {
+      if (operation.type === 'set') {
+        batch.set(doc(db, 'menu_items', operation.item.id), removeUndefined(operation.item));
+      } else {
+        batch.delete(doc(db, 'menu_items', operation.id));
+      }
     }
 
     await batch.commit();
-    console.log(`Committed chunk ${i + 1} to ${Math.min(i + chunkSize, initialMenuItems.length)} items.`);
+    console.log(`Committed operations ${i + 1} to ${Math.min(i + chunkSize, operations.length)}.`);
   }
 
   console.log('All items successfully synced to Firestore!');
 
   // Verify categories
   const snap = await getDocs(collection(db, 'menu_items'));
+  const syncedIds = new Set(snap.docs.map((menuDoc) => menuDoc.id));
+  const missingIds = initialMenuItems
+    .map((item) => item.id)
+    .filter((id) => !syncedIds.has(id));
+  const unexpectedIds = [...syncedIds].filter((id) => !itemIds.has(id));
+  if (missingIds.length > 0 || unexpectedIds.length > 0) {
+    throw new Error(
+      `Menu sync verification failed. Missing: ${missingIds.length}; unexpected: ${unexpectedIds.length}.`,
+    );
+  }
+
   console.log(`Total items now in Firestore: ${snap.size}`);
 
   const counts: Record<string, number> = {};

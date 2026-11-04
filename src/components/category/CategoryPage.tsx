@@ -29,38 +29,24 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
     setActiveSubFilter('all');
   }, [category.id]);
 
-  // Sub-filter tabs configuration for shawarma & tandoori
   const shawarmaSubFilters = [
     { id: 'all', label: 'الكل' },
-    { id: 'sandwich', label: '🌯 ساندوتشات شاورما' },
-    { id: 'meal', label: '🍱 وجبات شاورما' },
-    { id: 'tandoori', label: '🌶️ تندوري هندي' },
-    { id: 'maria', label: '🫓 ماريا سوري' },
-    { id: 'batates', label: '🍟 بطاطس سوري' },
+    { id: 'sandwiches', label: '🌯 الساندوتشات' },
+    { id: 'meals', label: '🍱 البوكسات العربية' },
+    { id: 'kaiser', label: '🥙 بوكس كايزر' },
+    { id: 'maria', label: '🫓 ماريا تشيز' },
+    { id: 'fatta', label: '🍚 الفتة' },
+    { id: 'weights', label: '⚖️ الأوزان' },
+    { id: 'potato', label: '🍟 بطاطس سوري' },
+    { id: 'western', label: '🍗 وجبات غربي' },
   ];
 
   const displayedItems = items.filter((item) => {
-    if (category.id !== 'shawarma' || activeSubFilter === 'all') return true;
-    if (activeSubFilter === 'sandwich') {
-      return (
-        item.nameAr.includes('سندوتش') &&
-        !item.nameAr.includes('تندوري') &&
-        !item.nameAr.includes('بطاطس')
-      );
-    }
-    if (activeSubFilter === 'meal') {
-      return item.nameAr.includes('وجبة') && !item.nameAr.includes('تندوري');
-    }
-    if (activeSubFilter === 'tandoori') {
-      return item.nameAr.includes('تندوري');
-    }
-    if (activeSubFilter === 'maria') {
-      return item.nameAr.includes('ماريا');
-    }
-    if (activeSubFilter === 'batates') {
-      return item.nameAr.includes('بطاطس');
-    }
-    return true;
+    return (
+      category.id !== 'shawarma' ||
+      activeSubFilter === 'all' ||
+      item.menuSection === activeSubFilter
+    );
   });
 
   return (
@@ -147,7 +133,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               {category.availableBranches && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-cairo font-black px-2 py-0.5 rounded-full bg-zinger-yellow/15 text-zinger-yellow border border-zinger-yellow/30">
                   <Sparkles className="w-3 h-3" />
-                  فرع فاقوس فقط
+                  فرع فاقوس المنشية فقط
                 </span>
               )}
             </div>

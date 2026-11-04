@@ -73,7 +73,7 @@ export const CheckoutDrawer: React.FC = () => {
 
     if (hasUnavailableItems) {
       showToast(
-        `الأصناف التالية متوفرة حصرياً في فرع فاقوس: ${unavailableItems.map((i) => i.item.nameAr).join('، ')}`,
+        `الأصناف التالية متوفرة حصرياً في فرع فاقوس المنشية: ${unavailableItems.map((i) => i.item.nameAr).join('، ')}`,
         'warning'
       );
       return;
@@ -233,7 +233,7 @@ export const CheckoutDrawer: React.FC = () => {
                     <span>تنبيه: أصناف غير متوفرة في {selectedBranch.name}</span>
                   </div>
                   <p className="text-[11px] text-amber-300/90 leading-relaxed">
-                    أصناف الشاورما والتندوري والبايا متوفرة حصرياً في <strong>فرع فاقوس - شارع أبو دهشان</strong>. يرجى تبديل الفرع إلى فرع فاقوس لإتمام الطلب أو حذف هذه الأصناف من السلة.
+                    الأصناف التالية متوفرة حصرياً في <strong>فرع فاقوس المنشية - شارع أبو دهشان</strong>. يرجى تبديل الفرع أو حذفها من السلة لإتمام الطلب.
                   </p>
                 </div>
               )}
@@ -410,7 +410,7 @@ export const CheckoutDrawer: React.FC = () => {
                   }`}
                 >
                   <Send className="w-4 h-4 stroke-[2.5]" />
-                  <span>{hasUnavailableItems ? 'يرجى تعديل السلة أو اختيار فرع فاقوس' : 'إرسال الطلب عبر واتساب'}</span>
+                  <span>{hasUnavailableItems ? 'يرجى تعديل السلة أو اختيار فرع فاقوس المنشية' : 'إرسال الطلب عبر واتساب'}</span>
                 </button>
 
                 <p className="text-[10px] text-zinc-500 text-center font-cairo">
